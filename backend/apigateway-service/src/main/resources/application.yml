@@ -1,0 +1,72 @@
+server:
+  port: 8000
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      routes:
+        - id: api-user
+          uri: lb://API-USER
+          predicates:
+            - Path=/api/user/register
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/api/user/(?<segment>.*), /$\{segment}
+        - id: api-user
+          uri: lb://API-USER
+          predicates:
+            - Path=/api/user/login
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/api/user/(?<segment>.*), /$\{segment}
+        - id: api-user
+          uri: lb://API-USER
+          predicates:
+            - Path=/api/user/**
+            - Method=GET,PUT,DELETE,POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/api/user/(?<segment>.*), /$\{segment}
+            - AuthorizationHeaderFilter
+        - id: api-diary
+          uri: lb://API-DIARY
+          predicates:
+            - Path=/api/diary/public
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/api/diary/(?<segment>.*), /$\{segment}
+        - id: api-diary
+          uri: lb://API-DIARY
+          predicates:
+            - Path=/api/diary/**
+            - Method=GET,PUT,DELETE,POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/api/diary/(?<segment>.*), /$\{segment}
+            - AuthorizationHeaderFilter
+        - id: api-music
+          uri: lb://API-MUSIC
+          predicates:
+            - Path=/api/music/**
+            - Method=GET,PUT,DELETE,POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/api/music/(?<segment>.*), /$\{segment}
+            - AuthorizationHeaderFilter
+
+
+token:
+  expiration_time: 864000000
+  secret: user_token
